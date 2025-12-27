@@ -58,7 +58,8 @@ app.delete("/applications/:id", async (req, res) => {
   }
 });
 
-// 5️⃣ 🚨 MUST BE LAST 🚨
-app.listen(3000, () => {
-  console.log("Server running");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
