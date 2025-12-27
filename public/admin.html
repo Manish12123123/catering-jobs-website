@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin – Job Applications</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    <h1>Job Applications</h1>
+
+    <!-- THIS IS REQUIRED -->
+    <ul id="applications"></ul>
+  </div>
+
+  <script>
+    function loadApplications() {
+      fetch("/applications")
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById("applications");
+          list.innerHTML = "";
+
+          if (data.length === 0) {
+            list.innerHTML = "<li>No applications yet</li>";
+            return;
+          }
+
+          data.forEach(app => {
+            const li = document.createElement("li");
+
+            li.innerHTML = `
+              <strong>${app.name}</strong><br>
+              ${app.email} | ${app.phone}<br>
+             Status: <b>${app.status || "Pending"}</b><br><br>
+
+
+              <button onclick="updateStatus('${app._id}', 'Approved')">Approve</button>
+              <button onclick="updateStatus('${app._id}', 'Rejected')">Reject</button>
+              <button onclick="deleteApp('${app._id}')">Delete</button>
+            `;
+
+            list.appendChild(li);
+          });
+        });
+    }
+
+    function updateStatus(id, status) {
+      fetch("/applications/" + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      }).then(() => loadApplications());
+    }
+
+    function deleteApp(id) {
+      if (!confirm("Are you sure you want to delete this application?")) return;
+
+      fetch("/applications/" + id, {
+        method: "DELETE"
+      }).then(() => loadApplications());
+    }
+
+    loadApplications();
+  </script>
+
+</body>
+</html>
