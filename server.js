@@ -1,41 +1,37 @@
-// 1️⃣ Imports
 const express = require("express");
 const mongoose = require("mongoose");
-const path = require("path"); // ✅ REQUIRED
+const path = require("path");
 require("dotenv").config();
 const Application = require("./models/Application");
 
-// 2️⃣ App setup
 const app = express();
-app.use(express.json());
-app.use(express.static("public"));
 
-// 3️⃣ Database connection
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public"))); // ✅ FIXED
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
 
-// 4️⃣ Routes
-
-// ✅ Homepage route (THIS FIXES BLANK PAGE)
+// Homepage
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// API routes
 app.post("/apply", async (req, res) => {
   try {
     const application = new Application(req.body);
     await application.save();
     res.json({ message: "Application submitted successfully!" });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Error submitting application" });
   }
 });
 
 app.get("/applications", async (req, res) => {
-  const applications = await Application.find();
-  res.json(applications);
+  res.json(await Application.find());
 });
 
 app.put("/applications/:id", async (req, res) => {
@@ -44,7 +40,7 @@ app.put("/applications/:id", async (req, res) => {
       status: req.body.status
     });
     res.json({ message: "Status updated" });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: "Error updating status" });
   }
 });
@@ -53,13 +49,10 @@ app.delete("/applications/:id", async (req, res) => {
   try {
     await Application.findByIdAndDelete(req.params.id);
     res.json({ message: "Application deleted" });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: "Error deleting application" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
