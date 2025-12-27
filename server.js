@@ -1,6 +1,7 @@
 // 1️⃣ Imports
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path"); // ✅ REQUIRED
 require("dotenv").config();
 const Application = require("./models/Application");
 
@@ -16,6 +17,12 @@ mongoose
   .catch(err => console.log(err));
 
 // 4️⃣ Routes
+
+// ✅ Homepage route (THIS FIXES BLANK PAGE)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 app.post("/apply", async (req, res) => {
   try {
     const application = new Application(req.body);
@@ -29,11 +36,6 @@ app.post("/apply", async (req, res) => {
 app.get("/applications", async (req, res) => {
   const applications = await Application.find();
   res.json(applications);
-});
-
-// 5️⃣ 🚨 THIS MUST BE LAST 🚨
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
 });
 
 app.put("/applications/:id", async (req, res) => {
@@ -54,4 +56,9 @@ app.delete("/applications/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Error deleting application" });
   }
+});
+
+// 5️⃣ 🚨 MUST BE LAST 🚨
+app.listen(3000, () => {
+  console.log("Server running");
 });
